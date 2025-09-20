@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/apiClient.ts';
+import { ApiError, apiClient } from '@/lib/apiClient.ts';
 import type {
   Contest,
   FinishSessionReq,
@@ -16,8 +16,23 @@ type FinishSessionPayload = {
   request: FinishSessionReq;
 };
 
+type ContestListResponse = { contests: Contest[] };
+
+const isContestListResponse = (value: unknown): value is ContestListResponse => {
+  if (typeof value !== 'object' || value === null) return false;
+  const contests = (value as { contests?: unknown }).contests;
+  return Array.isArray(contests);
+};
+
 export const fetchContests = async (): Promise<Contest[]> => {
-  return apiClient.get<Contest[]>('/contests');
+  const response = await apiClient.get<Contest[] | ContestListResponse>('/contests');
+  if (Array.isArray(response)) {
+    return response;
+  }
+  if (isContestListResponse(response)) {
+    return response.contests;
+  }
+  throw new ApiError(500, 'コンテスト一覧のレスポンス形式が不正です', response);
 };
 
 export const fetchContest = async (contestId: string): Promise<Contest> => {
