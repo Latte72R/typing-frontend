@@ -1,6 +1,8 @@
 import type { AuthUser } from '@/types/api.ts';
 
-const AUTH_USER_KEY = 'typingArenaAuthUser';
+export const AUTH_USER_STORAGE_KEY = 'typingArenaAuthUser';
+
+const AUTH_USER_KEY = AUTH_USER_STORAGE_KEY;
 
 export const storeAuthUser = (user: AuthUser) => {
   if (typeof window === 'undefined') return;
