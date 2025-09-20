@@ -97,9 +97,17 @@ export type PasswordResetPayload = {
 
 export type CreateContestPayload = {
   title: string;
+  description?: string;
+  visibility: ContestVisibility;
+  joinCode?: string;
+  startsAt: string;
+  endsAt: string;
+  timezone: 'Asia/Tokyo';
   timeLimitSec: number;
   maxAttempts: number;
   allowBackspace: boolean;
+  leaderboardVisibility: LeaderboardVisibility;
+  language: ContestLanguage;
 };
 
 export type CreatePromptPayload = {
