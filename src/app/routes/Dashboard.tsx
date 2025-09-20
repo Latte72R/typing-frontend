@@ -5,6 +5,7 @@ import styles from './Dashboard.module.css';
 
 export const Dashboard = () => {
   const { data, isLoading, error } = useContestsQuery();
+  const contests = Array.isArray(data) ? data : [];
 
   return (
     <PageContainer
@@ -14,12 +15,12 @@ export const Dashboard = () => {
       <section aria-label="コンテスト一覧" className={styles.contestList}>
         {isLoading ? <p>読み込み中...</p> : null}
         {error ? <p role="alert">コンテスト一覧の取得に失敗しました。</p> : null}
-        {!isLoading && !error && (!data || data.length === 0) ? (
+        {!isLoading && !error && contests.length === 0 ? (
           <p>
             現在、参加可能なコンテストがありません。バックエンドが起動しているか確認し、管理者の方は管理コンソールから新しいコンテストを作成して再度読み込んでください。
           </p>
         ) : null}
-        {data?.map((contest) => (
+        {contests.map((contest) => (
           <article key={contest.id} className={styles.card}>
             <h2>{contest.title}</h2>
             <p>{contest.description}</p>
