@@ -28,13 +28,12 @@ export const AdminForms = () => {
         </label>
         <div className={styles.checkbox}>
           <input
-            id="agree"
+            id="allowBackspace"
             type="checkbox"
             name="allowBackspace"
             defaultChecked={false}
-            required
           />
-          <label htmlFor="agree">Backspace を許可する</label>
+          <label htmlFor="allowBackspace">Backspace を許可する</label>
         </div>
         <button type="submit">保存</button>
       </form>

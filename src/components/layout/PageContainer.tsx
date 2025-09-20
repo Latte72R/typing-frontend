@@ -7,7 +7,7 @@ type PageContainerProps = PropsWithChildren<{
   actions?: React.ReactNode;
 }>;
 
-export const PageContainer = ({ title, description, actions, children }: PageContainerProps) => {
+export const PageContainer = ({ title, description, children }: PageContainerProps) => {
   return (
     <section className={styles.container} aria-labelledby="page-heading">
       <header className={styles.header}>
@@ -17,7 +17,6 @@ export const PageContainer = ({ title, description, actions, children }: PageCon
           </h1>
           {description ? <p className={styles.description}>{description}</p> : null}
         </div>
-        {actions ? <div className={styles.actions}>{actions}</div> : null}
       </header>
       <div className={styles.content}>{children}</div>
     </section>

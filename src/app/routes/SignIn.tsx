@@ -63,16 +63,6 @@ export const SignIn = () => {
             required
           />
         </div>
-        <div className={styles.checkbox}>
-          <input
-            id="agree"
-            type="checkbox"
-            checked={agreed}
-            onChange={(event) => setAgreed(event.target.checked)}
-            required
-          />
-          <label htmlFor="agree">利用規約とプライバシーポリシーに同意します</label>
-        </div>
         <button type="submit" className={styles.submit} disabled={signIn.isPending}>
           {signIn.isPending ? '送信中...' : 'サインイン'}
         </button>

@@ -61,7 +61,7 @@ export const NavigationBar = () => {
           {user ? (
             <>
               <span className={styles.userBadge} aria-live="polite">
-                {user.username}さんとしてログイン中
+                {user.username} としてログイン中
               </span>
               <LogoutButton className={styles.logoutButton} />
             </>

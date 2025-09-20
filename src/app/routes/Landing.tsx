@@ -11,25 +11,6 @@ export const Landing = () => {
     <PageContainer
       title="Typing Arena"
       description="e-typingの緊張感と分析機能を備えたモダンなタイピング学習・競技プラットフォーム"
-      actions={
-        user ? (
-          <div className={styles.actions}>
-            <p className={styles.loggedInMessage} aria-live="polite">
-              {user.username}さんとしてログイン中
-            </p>
-            <LogoutButton className={styles.logoutButton} />
-          </div>
-        ) : (
-          <div className={styles.actions}>
-            <Link className={styles.primaryCta} to="/signup">
-              今すぐ無料で始める
-            </Link>
-            <Link className={styles.secondaryCta} to="/signin">
-              ログイン
-            </Link>
-          </div>
-        )
-      }
     >
       <section className={styles.featureGrid} aria-label="主な特徴">
         <article>
