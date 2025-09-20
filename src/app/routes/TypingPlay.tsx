@@ -1,4 +1,4 @@
-import { KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
 import { KeyStats } from '@/components/typing/KeyStats.tsx';
@@ -103,19 +103,17 @@ export const TypingPlay = () => {
     });
   };
 
-  const handleFinish = () => {
+  const handleFinish = useCallback(() => {
     if (!session || finishedRef.current) {
       return;
     }
     finishedRef.current = true;
     setIsRunning(false);
     const now = performance.now();
+    const timeLimit = contest?.timeLimitSec ?? Number.POSITIVE_INFINITY;
     const elapsedSeconds = Math.max(
       1,
-      Math.min(
-        contest?.timeLimitSec ?? Number.POSITIVE_INFINITY,
-        startTimeRef.current ? (now - startTimeRef.current) / 1000 : contest?.timeLimitSec ?? 1,
-      ),
+      Math.min(timeLimit, startTimeRef.current ? (now - startTimeRef.current) / 1000 : timeLimit),
     );
     const totalTyped = correctCount + errorCount;
     const accuracyValue = calculateAccuracy(correctCount, totalTyped);
@@ -146,13 +144,24 @@ export const TypingPlay = () => {
         navigate(`/result/${session.sessionId}`, { state: { result, contest } });
       },
     });
-  };
+  }, [
+    contest,
+    correctCount,
+    defocusCount,
+    errorCount,
+    finishSession,
+    keyIntervals,
+    keyLog,
+    navigate,
+    pasteBlocked,
+    session,
+  ]);
 
   useEffect(() => {
     if (session && cursor >= typingTarget.length && typingTarget.length > 0) {
       handleFinish();
     }
-  }, [cursor, session, typingTarget.length]);
+  }, [cursor, handleFinish, session, typingTarget.length]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!session || !isRunning) return;
