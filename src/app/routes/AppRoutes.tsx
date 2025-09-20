@@ -4,7 +4,6 @@ import { SignIn } from './SignIn.tsx';
 import { SignUp } from './SignUp.tsx';
 import { PasswordReset } from './PasswordReset.tsx';
 import { Dashboard } from './Dashboard.tsx';
-import { Practice } from './Practice.tsx';
 import { ContestLobby } from './ContestLobby.tsx';
 import { TypingPlay } from './TypingPlay.tsx';
 import { Result } from './Result.tsx';
@@ -19,7 +18,6 @@ export const AppRoutes = () => {
     { path: '/signup', element: <SignUp /> },
     { path: '/password-reset', element: <PasswordReset /> },
     { path: '/dashboard', element: <Dashboard /> },
-    { path: '/practice', element: <Practice /> },
     { path: '/contests/:contestId', element: <ContestLobby /> },
     { path: '/typing/:contestId', element: <TypingPlay /> },
     { path: '/result/:sessionId', element: <Result /> },
