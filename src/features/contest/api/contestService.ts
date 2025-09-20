@@ -29,7 +29,7 @@ export const fetchLeaderboard = async (contestId: string): Promise<LeaderboardPa
 };
 
 export const joinContest = async (contestId: string, payload: JoinContestPayload = {}) => {
-  const body = payload.joinCode ? payload : undefined;
+  const body: JoinContestPayload = payload.joinCode ? payload : {};
   return apiClient.post<void>(`/contests/${contestId}/join`, body);
 };
 
