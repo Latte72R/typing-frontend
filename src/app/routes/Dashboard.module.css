@@ -1,0 +1,57 @@
+.contestList {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.card {
+  border-radius: 0.75rem;
+  border: 1px solid #d0d7e2;
+  padding: 1rem;
+  background-color: #ffffff;
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+.meta {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.meta div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.meta dt {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.meta dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #1b8cd8;
+  color: #1b8cd8;
+  text-decoration: none;
+}
+
+.actions a:last-of-type {
+  background: linear-gradient(120deg, #1b8cd8, #1fd1a5);
+  color: #fff;
+}

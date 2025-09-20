@@ -1,0 +1,52 @@
+.form {
+  display: grid;
+  gap: 1rem;
+  max-width: 480px;
+}
+
+.field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.field input,
+.form textarea,
+.form select {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #c7d2e2;
+  background-color: #fdfefe;
+}
+
+.checkbox {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.checkbox input {
+  margin-top: 0.2rem;
+}
+
+.submit {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(120deg, #22438a, #1b8cd8);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.switchLink a {
+  margin-left: 0.25rem;
+}
