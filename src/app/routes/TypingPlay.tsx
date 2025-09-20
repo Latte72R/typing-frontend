@@ -17,7 +17,7 @@ import {
   calculateScore,
   calculateWpm,
 } from '@/lib/keyboard/typingUtils.ts';
-import { KeyLogEntry, SessionResult, StartSessionRes } from '@/types/api.ts';
+import { FinishSessionReq, KeyLogEntry, SessionResult, StartSessionRes } from '@/types/api.ts';
 import styles from './TypingPlay.module.css';
 
 export const TypingPlay = () => {
@@ -39,6 +39,7 @@ export const TypingPlay = () => {
   const [defocusCount, setDefocusCount] = useState(0);
   const [pasteBlocked] = useState(true);
   const [focusWarning, setFocusWarning] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const focusRef = useRef<HTMLDivElement | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -88,6 +89,7 @@ export const TypingPlay = () => {
     setRemainingSeconds(contest?.timeLimitSec ?? 0);
     setDefocusCount(0);
     setFocusWarning(false);
+    setSubmitError(null);
     startTimeRef.current = performance.now();
     lastKeyTimeRef.current = null;
     finishedRef.current = false;
@@ -98,8 +100,12 @@ export const TypingPlay = () => {
 
   const handleStartSession = () => {
     if (!contestId) return;
+    setSubmitError(null);
     startSession.mutate(contestId, {
       onSuccess: resetState,
+      onError: (error) => {
+        setSubmitError(error.message ?? 'セッションを開始できませんでした。');
+      },
     });
   };
 
@@ -122,9 +128,7 @@ export const TypingPlay = () => {
     const score = calculateScore(cpmValue, accuracyValue);
     const anomalyScore = calculateAnomalyScore(keyIntervals);
 
-    const result: SessionResult = {
-      sessionId: session.sessionId,
-      contestId: session.contestId,
+    const request: FinishSessionReq = {
       cpm: cpmValue,
       wpm: wpmValue,
       accuracy: accuracyValue,
@@ -135,15 +139,32 @@ export const TypingPlay = () => {
         pasteBlocked,
         anomalyScore,
       },
+    };
+
+    const optimisticResult: SessionResult = {
+      sessionId: session.sessionId,
+      contestId: session.contestId,
+      ...request,
       completedAt: new Date().toISOString(),
       score,
     };
 
-    finishSession.mutate(result, {
-      onSuccess: () => {
-        navigate(`/result/${session.sessionId}`, { state: { result, contest } });
+    setSubmitError(null);
+
+    finishSession.mutate(
+      { sessionId: session.sessionId, contestId: session.contestId, request },
+      {
+        onSuccess: (data) => {
+          const nextResult = data ?? optimisticResult;
+          navigate(`/result/${session.sessionId}`, { state: { result: nextResult, contest } });
+        },
+        onError: (error) => {
+          console.error('セッション結果の送信に失敗しました', error);
+          finishedRef.current = false;
+          setSubmitError('結果の送信に失敗しました。ネットワーク状態を確認して再試行してください。');
+        },
       },
-    });
+    );
   }, [
     contest,
     correctCount,
@@ -165,7 +186,7 @@ export const TypingPlay = () => {
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (!session || !isRunning) return;
-    if (event.isComposing) return;
+    if (event.nativeEvent.isComposing) return;
 
     const { key, ctrlKey, metaKey, altKey } = event;
 
@@ -296,6 +317,11 @@ export const TypingPlay = () => {
           {focusWarning ? (
             <p className={styles.warning} role="alert">
               フォーカスが外れました。戻って続行してください。（回数: {defocusCount}）
+            </p>
+          ) : null}
+          {submitError ? (
+            <p className={styles.error} role="alert">
+              {submitError}
             </p>
           ) : null}
         </div>

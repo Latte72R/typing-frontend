@@ -50,3 +50,16 @@
 .switchLink a {
   margin-left: 0.25rem;
 }
+
+.feedback {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.feedbackSuccess {
+  color: #15803d;
+}
+
+.feedbackError {
+  color: #b91c1c;
+}

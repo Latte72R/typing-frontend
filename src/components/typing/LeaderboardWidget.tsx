@@ -6,10 +6,14 @@ type LeaderboardWidgetProps = {
 };
 
 export const LeaderboardWidget = ({ contestId }: LeaderboardWidgetProps) => {
-  const { data, isLoading } = useLeaderboardQuery(contestId, Boolean(contestId));
+  const { data, isLoading, error } = useLeaderboardQuery(contestId, Boolean(contestId));
 
   if (isLoading) {
     return <p>ランキングを取得しています...</p>;
+  }
+
+  if (error) {
+    return <p role="alert">ランキングの取得に失敗しました。</p>;
   }
 
   if (!data) {

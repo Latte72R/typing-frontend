@@ -1,21 +1,40 @@
 import { FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
+import { useSignInMutation } from '@/features/auth/api/authQueries.ts';
+import { setAccessToken } from '@/lib/apiClient.ts';
+import { storeAuthUser } from '@/lib/authStorage.ts';
 import styles from './Auth.module.css';
 
 export const SignIn = () => {
+  const navigate = useNavigate();
+  const signIn = useSignInMutation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreed, setAgreed] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!agreed) {
-      setMessage('利用規約への同意が必要です');
+      setFeedback({ type: 'error', message: '利用規約への同意が必要です。' });
       return;
     }
-    setMessage('デモ環境のため、サーバー接続は行われません。');
+    setFeedback(null);
+    signIn.mutate(
+      { email, password },
+      {
+        onSuccess: (data) => {
+          setAccessToken(data.accessToken);
+          storeAuthUser(data.user);
+          setFeedback({ type: 'success', message: 'ログインに成功しました。ダッシュボードへ移動します。' });
+          navigate('/dashboard');
+        },
+        onError: (error) => {
+          setFeedback({ type: 'error', message: error.message ?? 'サインインに失敗しました。' });
+        },
+      },
+    );
   };
 
   return (
@@ -53,10 +72,17 @@ export const SignIn = () => {
           />
           <label htmlFor="agree">利用規約とプライバシーポリシーに同意します</label>
         </div>
-        <button type="submit" className={styles.submit}>
-          サインイン
+        <button type="submit" className={styles.submit} disabled={signIn.isPending}>
+          {signIn.isPending ? '送信中...' : 'サインイン'}
         </button>
-        {message ? <p role="status">{message}</p> : null}
+        {feedback ? (
+          <p
+            className={`${styles.feedback} ${feedback.type === 'error' ? styles.feedbackError : styles.feedbackSuccess}`}
+            role={feedback.type === 'error' ? 'alert' : 'status'}
+          >
+            {feedback.message}
+          </p>
+        ) : null}
         <p className={styles.switchLink}>
           アカウントをお持ちでない場合は<Link to="/signup">新規登録</Link>へ
         </p>

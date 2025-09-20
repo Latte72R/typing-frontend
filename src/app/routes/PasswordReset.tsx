@@ -1,14 +1,27 @@
 import { FormEvent, useState } from 'react';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
+import { usePasswordResetMutation } from '@/features/auth/api/authQueries.ts';
 import styles from './Auth.module.css';
 
 export const PasswordReset = () => {
+  const reset = usePasswordResetMutation();
   const [email, setEmail] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMessage('デモ環境のため、再設定メールは送信されません。');
+    setFeedback(null);
+    reset.mutate(
+      { email },
+      {
+        onSuccess: () => {
+          setFeedback({ type: 'success', message: '再設定メールを送信しました。' });
+        },
+        onError: (error) => {
+          setFeedback({ type: 'error', message: error.message ?? '再設定リクエストに失敗しました。' });
+        },
+      },
+    );
   };
 
   return (
@@ -25,10 +38,17 @@ export const PasswordReset = () => {
             required
           />
         </div>
-        <button type="submit" className={styles.submit}>
-          再設定リンクを送信
+        <button type="submit" className={styles.submit} disabled={reset.isPending}>
+          {reset.isPending ? '送信中...' : '再設定リンクを送信'}
         </button>
-        {message ? <p role="status">{message}</p> : null}
+        {feedback ? (
+          <p
+            className={`${styles.feedback} ${feedback.type === 'error' ? styles.feedbackError : styles.feedbackSuccess}`}
+            role={feedback.type === 'error' ? 'alert' : 'status'}
+          >
+            {feedback.message}
+          </p>
+        ) : null}
       </form>
     </PageContainer>
   );

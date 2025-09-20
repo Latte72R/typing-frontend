@@ -4,7 +4,7 @@ import { useContestsQuery } from '@/features/contest/api/contestQueries.ts';
 import styles from './Dashboard.module.css';
 
 export const Dashboard = () => {
-  const { data, isLoading } = useContestsQuery();
+  const { data, isLoading, error } = useContestsQuery();
 
   return (
     <PageContainer
@@ -13,6 +13,7 @@ export const Dashboard = () => {
     >
       <section aria-label="コンテスト一覧" className={styles.contestList}>
         {isLoading ? <p>読み込み中...</p> : null}
+        {error ? <p role="alert">コンテスト一覧の取得に失敗しました。</p> : null}
         {data?.map((contest) => (
           <article key={contest.id} className={styles.card}>
             <h2>{contest.title}</h2>

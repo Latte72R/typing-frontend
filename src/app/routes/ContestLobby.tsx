@@ -1,22 +1,38 @@
 import { FormEvent, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
-import { useContestQuery } from '@/features/contest/api/contestQueries.ts';
+import { useContestQuery, useJoinContestMutation } from '@/features/contest/api/contestQueries.ts';
 import styles from './ContestLobby.module.css';
 
 export const ContestLobby = () => {
   const { contestId = '' } = useParams();
-  const { data: contest, isLoading } = useContestQuery(contestId, Boolean(contestId));
+  const { data: contest, isLoading, error } = useContestQuery(contestId, Boolean(contestId));
+  const joinContest = useJoinContestMutation();
   const [code, setCode] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (contest?.visibility === 'private' && code.trim() === '') {
-      setMessage('参加コードを入力してください');
+    if (!contestId) {
+      setFeedback({ type: 'error', message: 'コンテストIDが無効です。' });
       return;
     }
-    setMessage('デモ環境のため、参加リクエストは送信されません。');
+    if (contest?.visibility === 'private' && code.trim() === '') {
+      setFeedback({ type: 'error', message: '参加コードを入力してください。' });
+      return;
+    }
+    setFeedback(null);
+    joinContest.mutate(
+      { contestId, joinCode: code.trim() || undefined },
+      {
+        onSuccess: () => {
+          setFeedback({ type: 'success', message: '参加登録が完了しました。' });
+        },
+        onError: (error) => {
+          setFeedback({ type: 'error', message: error.message ?? '参加登録に失敗しました。' });
+        },
+      },
+    );
   };
 
   return (
@@ -32,7 +48,8 @@ export const ContestLobby = () => {
       }
     >
       {isLoading ? <p>読み込み中...</p> : null}
-      {!contest && !isLoading ? <p>コンテストが見つかりません。</p> : null}
+      {error ? <p role="alert">コンテスト情報の取得に失敗しました。</p> : null}
+      {!contest && !isLoading && !error ? <p>コンテストが見つかりません。</p> : null}
       {contest ? (
         <div className={styles.grid}>
           <section>
@@ -67,8 +84,17 @@ export const ContestLobby = () => {
                 placeholder={contest.visibility === 'private' ? 'コード必須' : '公開コンテスト'}
                 aria-required={contest.visibility === 'private'}
               />
-              <button type="submit">参加登録</button>
-              {message ? <p role="status">{message}</p> : null}
+              <button type="submit" disabled={joinContest.isPending}>
+                {joinContest.isPending ? '送信中...' : '参加登録'}
+              </button>
+              {feedback ? (
+                <p
+                  className={`${styles.feedback} ${feedback.type === 'error' ? styles.feedbackError : styles.feedbackSuccess}`}
+                  role={feedback.type === 'error' ? 'alert' : 'status'}
+                >
+                  {feedback.message}
+                </p>
+              ) : null}
             </form>
           </section>
         </div>

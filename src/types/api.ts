@@ -69,3 +69,28 @@ export type LeaderboardPayload = {
   top: LeaderboardEntry[];
   me?: LeaderboardEntry | null;
 };
+
+export type AuthUser = {
+  id: string;
+  username: string;
+  email: string;
+  role: 'user' | 'admin';
+};
+
+export type AuthResponse = {
+  accessToken: string;
+  user: AuthUser;
+};
+
+export type SignInPayload = {
+  email: string;
+  password: string;
+};
+
+export type SignUpPayload = SignInPayload & {
+  username: string;
+};
+
+export type PasswordResetPayload = {
+  email: string;
+};

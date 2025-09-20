@@ -82,3 +82,12 @@
   color: #991b1b;
   font-weight: 600;
 }
+
+.error {
+  margin: 0;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  font-weight: 600;
+}

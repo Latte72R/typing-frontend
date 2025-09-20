@@ -1,12 +1,13 @@
-import { useMutation, useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   fetchContest,
   fetchContests,
   fetchLeaderboard,
   finishContestSession,
+  joinContest,
   startContestSession,
-} from './mockContestService.ts';
-import { LeaderboardPayload, SessionResult, StartSessionRes } from '@/types/api.ts';
+} from './contestService.ts';
+import { FinishSessionReq, LeaderboardPayload, SessionResult, StartSessionRes } from '@/types/api.ts';
 
 const contestKeys = {
   all: ['contests'] as const,
@@ -15,14 +16,22 @@ const contestKeys = {
   session: (contestId: string) => [...contestKeys.detail(contestId), 'session'] as const,
 };
 
-type Options<T> = Omit<UseQueryOptions<T, Error, T, ReturnType<typeof contestKeys.all>>, 'queryKey' | 'queryFn'>;
+type FinishSessionVariables = {
+  sessionId: string;
+  contestId: string;
+  request: FinishSessionReq;
+};
 
-export const useContestsQuery = (options?: Options<Awaited<ReturnType<typeof fetchContests>>>) =>
+type JoinContestVariables = {
+  contestId: string;
+  joinCode?: string;
+};
+
+export const useContestsQuery = () =>
   useQuery({
     queryKey: contestKeys.all,
     queryFn: fetchContests,
     staleTime: 60_000,
-    ...options,
   });
 
 export const useContestQuery = (contestId: string, enabled = true) =>
@@ -45,7 +54,23 @@ export const useStartSessionMutation = () =>
     mutationFn: (contestId: string) => startContestSession(contestId),
   });
 
-export const useFinishSessionMutation = () =>
-  useMutation<SessionResult, Error, SessionResult>({
-    mutationFn: (payload) => finishContestSession(payload),
+export const useFinishSessionMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<SessionResult, Error, FinishSessionVariables>({
+    mutationFn: ({ sessionId, request }) => finishContestSession({ sessionId, request }),
+    onSuccess: (data, variables) => {
+      const targetContestId = data?.contestId ?? variables.contestId;
+      queryClient.invalidateQueries({ queryKey: contestKeys.leaderboard(targetContestId) });
+    },
   });
+};
+
+export const useJoinContestMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation<void, Error, JoinContestVariables>({
+    mutationFn: ({ contestId, joinCode }) => joinContest(contestId, { joinCode }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: contestKeys.detail(variables.contestId) });
+    },
+  });
+};
