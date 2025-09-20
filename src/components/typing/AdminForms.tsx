@@ -1,4 +1,4 @@
-import { FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import styles from './AdminForms.module.css';
 
 export const AdminForms = () => {

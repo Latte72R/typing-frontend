@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
 import { useContestQuery, useJoinContestMutation } from '@/features/contest/api/contestQueries.ts';

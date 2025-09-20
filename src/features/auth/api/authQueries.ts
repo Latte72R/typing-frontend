@@ -5,7 +5,7 @@ import {
   signOut,
   signUp,
 } from './authService.ts';
-import {
+import type {
   AuthResponse,
   PasswordResetPayload,
   SignInPayload,

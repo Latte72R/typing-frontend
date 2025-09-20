@@ -1,4 +1,4 @@
-import { AuthUser } from '@/types/api.ts';
+import type { AuthUser } from '@/types/api.ts';
 
 const AUTH_USER_KEY = 'typingArenaAuthUser';
 

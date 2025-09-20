@@ -1,4 +1,4 @@
-import { KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
 import { KeyStats } from '@/components/typing/KeyStats.tsx';
@@ -17,7 +17,7 @@ import {
   calculateScore,
   calculateWpm,
 } from '@/lib/keyboard/typingUtils.ts';
-import { FinishSessionReq, KeyLogEntry, SessionResult, StartSessionRes } from '@/types/api.ts';
+import type { FinishSessionReq, KeyLogEntry, SessionResult, StartSessionRes } from '@/types/api.ts';
 import styles from './TypingPlay.module.css';
 
 export const TypingPlay = () => {
@@ -227,8 +227,9 @@ export const TypingPlay = () => {
 
     const expectedChar = typingTarget[cursor];
     const timestamp = performance.now();
-    if (lastKeyTimeRef.current != null) {
-      setKeyIntervals((prev) => [...prev, timestamp - lastKeyTimeRef.current!]);
+    const lastKeyTime = lastKeyTimeRef.current;
+    if (lastKeyTime != null) {
+      setKeyIntervals((prev) => [...prev, timestamp - lastKeyTime]);
     }
     lastKeyTimeRef.current = timestamp;
 

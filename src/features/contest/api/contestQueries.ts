@@ -7,7 +7,7 @@ import {
   joinContest,
   startContestSession,
 } from './contestService.ts';
-import { FinishSessionReq, LeaderboardPayload, SessionResult, StartSessionRes } from '@/types/api.ts';
+import type { FinishSessionReq, LeaderboardPayload, SessionResult, StartSessionRes } from '@/types/api.ts';
 
 const contestKeys = {
   all: ['contests'] as const,

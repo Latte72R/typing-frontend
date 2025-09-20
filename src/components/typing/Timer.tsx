@@ -17,7 +17,16 @@ export const Timer = ({ duration, isRunning, onExpire, onTick, resetKey }: Timer
     setRemaining(duration);
     hasExpiredRef.current = false;
     onTick?.(duration);
-  }, [duration, resetKey, onTick]);
+  }, [duration, onTick]);
+
+  useEffect(() => {
+    if (resetKey == null) {
+      return;
+    }
+    setRemaining(duration);
+    hasExpiredRef.current = false;
+    onTick?.(duration);
+  }, [resetKey, duration, onTick]);
 
   useEffect(() => {
     if (!isRunning || remaining <= 0 || hasExpiredRef.current) {

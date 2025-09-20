@@ -2,7 +2,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
 import { KeyStats } from '@/components/typing/KeyStats.tsx';
 import { formatAccuracy } from '@/lib/keyboard/typingUtils.ts';
-import { SessionResult } from '@/types/api.ts';
+import type { SessionResult } from '@/types/api.ts';
 import styles from './Result.module.css';
 
 type ResultLocationState = {

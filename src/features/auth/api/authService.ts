@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/apiClient.ts';
-import {
+import type {
   AuthResponse,
   PasswordResetPayload,
   SignInPayload,

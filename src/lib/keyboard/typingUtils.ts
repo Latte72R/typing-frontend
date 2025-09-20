@@ -11,7 +11,7 @@ export const calculateCpm = (correct: number, durationSec: number) => {
 export const calculateWpm = (cpm: number) => Math.round(cpm / 5);
 
 export const calculateScore = (cpm: number, accuracy: number) =>
-  Math.floor(cpm * Math.pow(accuracy, 2) / 2);
+  Math.floor((cpm * accuracy ** 2) / 2);
 
 export const formatAccuracy = (accuracy: number) => `${(accuracy * 100).toFixed(1)}%`;
 
@@ -38,7 +38,7 @@ export const calculateAnomalyScore = (intervals: number[]) => {
   }
   const avg = intervals.reduce((sum, value) => sum + value, 0) / intervals.length;
   const variance =
-    intervals.reduce((sum, value) => sum + Math.pow(value - avg, 2), 0) / intervals.length;
+    intervals.reduce((sum, value) => sum + (value - avg) ** 2, 0) / intervals.length;
   const std = Math.sqrt(variance);
   const coefficient = avg === 0 ? 0 : std / avg;
   return Number((1 - Math.min(coefficient, 1)).toFixed(2));

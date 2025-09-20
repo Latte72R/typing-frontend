@@ -89,7 +89,7 @@ const request = async <T>(path: string, { method = 'GET', headers, body, ...rest
   }
 
   const contentType = response.headers.get('content-type');
-  if (contentType && contentType.includes('application/json')) {
+  if (contentType?.includes('application/json')) {
     return (await response.json()) as T;
   }
   return (await response.text()) as T;

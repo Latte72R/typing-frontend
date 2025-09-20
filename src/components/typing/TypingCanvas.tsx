@@ -21,6 +21,7 @@ export const TypingCanvas = ({ displayText, typingTarget, cursorIndex, hasError 
         {characters.map((char, index) => {
           const isCurrent = index === cursorIndex;
           const isTyped = index < cursorIndex;
+          const key = typingTarget.slice(0, index + 1);
           const className = clsx(styles.char, {
             [styles.typed]: isTyped,
             [styles.current]: isCurrent && !hasError,
@@ -28,7 +29,7 @@ export const TypingCanvas = ({ displayText, typingTarget, cursorIndex, hasError 
             [styles.pending]: !isTyped && !isCurrent,
           });
           return (
-            <span key={`${char}-${index}`} className={className} aria-hidden="true">
+            <span key={key} className={className} aria-hidden="true">
               {char}
             </span>
           );
@@ -39,9 +40,9 @@ export const TypingCanvas = ({ displayText, typingTarget, cursorIndex, hasError 
           </span>
         ) : null}
       </div>
-      <p className={styles.progress} role="status">
+      <output className={styles.progress}>
         残り {remaining} 文字
-      </p>
+      </output>
     </div>
   );
 };
