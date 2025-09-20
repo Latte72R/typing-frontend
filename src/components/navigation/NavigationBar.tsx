@@ -10,16 +10,18 @@ type NavigationItem = {
   to?: string;
 };
 
-const staticLinks: NavigationItem[] = [
-  { key: 'home', to: '/', label: 'トップ' },
-  { key: 'dashboard', to: '/dashboard', label: 'ダッシュボード' },
-  { key: 'admin', to: '/admin', label: '管理コンソール' },
-];
-
 export const NavigationBar = () => {
   const { data: contests } = useContestsQuery();
   const leaderboardContestId = contests?.[0]?.id;
   const { user } = useAuth();
+
+  const staticLinks: NavigationItem[] = [
+    { key: 'home', to: '/', label: 'トップ' },
+    { key: 'dashboard', to: '/dashboard', label: 'ダッシュボード' },
+  ];
+  if (user?.role === 'admin') {
+    staticLinks.push({ key: 'admin', to: '/admin', label: '管理コンソール' });
+  }
 
   const leaderboardLink: NavigationItem = leaderboardContestId
     ? { key: 'leaderboard', to: `/leaderboard/${leaderboardContestId}`, label: 'ランキング' }
