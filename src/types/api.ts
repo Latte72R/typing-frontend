@@ -94,3 +94,16 @@ export type SignUpPayload = SignInPayload & {
 export type PasswordResetPayload = {
   email: string;
 };
+
+export type CreateContestPayload = {
+  title: string;
+  timeLimitSec: number;
+  maxAttempts: number;
+  allowBackspace: boolean;
+};
+
+export type CreatePromptPayload = {
+  displayText: string;
+  typingTarget: string;
+  language: ContestLanguage;
+};
