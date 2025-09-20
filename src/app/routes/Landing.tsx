@@ -1,21 +1,34 @@
 import { Link } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
+import { LogoutButton } from '@/features/auth/components/LogoutButton.tsx';
+import { useAuth } from '@/features/auth/contexts/AuthContext.tsx';
 import styles from './Landing.module.css';
 
 export const Landing = () => {
+  const { user } = useAuth();
+
   return (
     <PageContainer
       title="Typing Arena"
       description="e-typingの緊張感と分析機能を備えたモダンなタイピング学習・競技プラットフォーム"
       actions={
-        <div className={styles.actions}>
-          <Link className={styles.primaryCta} to="/signup">
-            今すぐ無料で始める
-          </Link>
-          <Link className={styles.secondaryCta} to="/signin">
-            ログイン
-          </Link>
-        </div>
+        user ? (
+          <div className={styles.actions}>
+            <p className={styles.loggedInMessage} aria-live="polite">
+              {user.username}さんとしてログイン中
+            </p>
+            <LogoutButton className={styles.logoutButton} />
+          </div>
+        ) : (
+          <div className={styles.actions}>
+            <Link className={styles.primaryCta} to="/signup">
+              今すぐ無料で始める
+            </Link>
+            <Link className={styles.secondaryCta} to="/signin">
+              ログイン
+            </Link>
+          </div>
+        )
       }
     >
       <section className={styles.featureGrid} aria-label="主な特徴">

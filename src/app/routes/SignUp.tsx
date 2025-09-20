@@ -2,13 +2,14 @@ import { type FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
 import { useSignUpMutation } from '@/features/auth/api/authQueries.ts';
+import { useAuth } from '@/features/auth/contexts/AuthContext.tsx';
 import { setAccessToken } from '@/lib/apiClient.ts';
-import { storeAuthUser } from '@/lib/authStorage.ts';
 import styles from './Auth.module.css';
 
 export const SignUp = () => {
   const navigate = useNavigate();
   const signUp = useSignUpMutation();
+  const { setUser } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +28,7 @@ export const SignUp = () => {
       {
         onSuccess: (data) => {
           setAccessToken(data.accessToken);
-          storeAuthUser(data.user);
+          setUser(data.user);
           setFeedback({ type: 'success', message: 'アカウント登録が完了しました。ダッシュボードへ移動します。' });
           navigate('/dashboard');
         },

@@ -1,4 +1,6 @@
 import { NavLink } from 'react-router-dom';
+import { LogoutButton } from '@/features/auth/components/LogoutButton.tsx';
+import { useAuth } from '@/features/auth/contexts/AuthContext.tsx';
 import { useContestsQuery } from '@/features/contest/api/contestQueries.ts';
 import styles from './NavigationBar.module.css';
 
@@ -18,6 +20,7 @@ const staticLinks: NavigationItem[] = [
 export const NavigationBar = () => {
   const { data: contests } = useContestsQuery();
   const leaderboardContestId = contests?.[0]?.id;
+  const { user } = useAuth();
 
   const leaderboardLink: NavigationItem = leaderboardContestId
     ? { key: 'leaderboard', to: `/leaderboard/${leaderboardContestId}`, label: 'ランキング' }
@@ -32,7 +35,7 @@ export const NavigationBar = () => {
         <NavLink to="/" className={styles.brand}>
           Typing Arena
         </NavLink>
-        <nav aria-label="主要ナビゲーション">
+        <nav className={styles.nav} aria-label="主要ナビゲーション">
           <ul className={styles.linkList}>
             {links.map((link) => (
               <li key={link.key}>
@@ -54,6 +57,37 @@ export const NavigationBar = () => {
             ))}
           </ul>
         </nav>
+        <div className={styles.authArea}>
+          {user ? (
+            <>
+              <span className={styles.userBadge} aria-live="polite">
+                {user.username}さんとしてログイン中
+              </span>
+              <LogoutButton className={styles.logoutButton} />
+            </>
+          ) : (
+            <div className={styles.authLinks}>
+              <NavLink
+                to="/signin"
+                className={({ isActive }) =>
+                  isActive ? `${styles.authLink} ${styles.authLinkActive}` : styles.authLink
+                }
+              >
+                ログイン
+              </NavLink>
+              <NavLink
+                to="/signup"
+                className={({ isActive }) =>
+                  isActive
+                    ? `${styles.authLink} ${styles.authLinkPrimary} ${styles.authLinkActive}`
+                    : `${styles.authLink} ${styles.authLinkPrimary}`
+                }
+              >
+                新規登録
+              </NavLink>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

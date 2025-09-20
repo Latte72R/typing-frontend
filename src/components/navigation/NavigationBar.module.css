@@ -10,6 +10,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0.75rem 1rem;
+  gap: 1rem;
 }
 
 .brand {
@@ -17,6 +18,12 @@
   font-weight: 700;
   color: inherit;
   text-decoration: none;
+}
+
+.nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .linkList {
@@ -51,6 +58,87 @@
   cursor: not-allowed;
 }
 
+.authArea {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userBadge {
+  font-size: 0.875rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+}
+
+.authLinks {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.authLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+
+.authLink:hover,
+.authLink:focus-visible {
+  opacity: 0.85;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.authLinkPrimary {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #1b8cd8;
+}
+
+.authLinkPrimary:hover,
+.authLinkPrimary:focus-visible {
+  color: #1b8cd8;
+  opacity: 0.9;
+  background-color: #ffffff;
+}
+
+.authLinkActive {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.logoutButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: transparent;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.logoutButton:hover,
+.logoutButton:focus-visible {
+  background-color: rgba(255, 255, 255, 0.2);
+  opacity: 0.85;
+}
+
+.logoutButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
 @media (max-width: 768px) {
   .inner {
     flex-direction: column;
@@ -58,7 +146,28 @@
     gap: 0.75rem;
   }
 
+  .nav {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .linkList {
     flex-wrap: wrap;
+  }
+
+  .authArea {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .authLinks {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .userBadge {
+    margin-right: auto;
   }
 }
