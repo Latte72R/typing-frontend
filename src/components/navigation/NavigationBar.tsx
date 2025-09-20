@@ -13,7 +13,6 @@ type NavigationItem = {
 const staticLinks: NavigationItem[] = [
   { key: 'home', to: '/', label: 'トップ' },
   { key: 'dashboard', to: '/dashboard', label: 'ダッシュボード' },
-  { key: 'practice', to: '/practice', label: '練習' },
   { key: 'admin', to: '/admin', label: '管理コンソール' },
 ];
 
@@ -27,7 +26,7 @@ export const NavigationBar = () => {
     : { key: 'leaderboard', label: 'ランキング' };
 
   const links: NavigationItem[] = [...staticLinks];
-  links.splice(3, 0, leaderboardLink);
+  links.splice(2, 0, leaderboardLink);
 
   return (
     <header className={styles.header}>
