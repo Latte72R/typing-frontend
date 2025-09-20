@@ -12,15 +12,10 @@ export const SignIn = () => {
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [agreed, setAgreed] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!agreed) {
-      setFeedback({ type: 'error', message: '利用規約への同意が必要です。' });
-      return;
-    }
     setFeedback(null);
     signIn.mutate(
       { email, password },
