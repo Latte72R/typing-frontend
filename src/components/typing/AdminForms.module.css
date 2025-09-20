@@ -44,6 +44,9 @@
 .checkbox {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
-  font-weight: 500;
+  align-items: flex-start;
+}
+
+.checkbox input {
+  margin-top: 0.4rem;
 }

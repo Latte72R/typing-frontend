@@ -26,10 +26,16 @@ export const AdminForms = () => {
           最大試行回数
           <input type="number" name="maxAttempts" min={0} max={10} defaultValue={3} />
         </label>
-        <label className={styles.checkbox}>
-          <input type="checkbox" name="allowBackspace" defaultChecked={false} />
-          Backspace を許可する
-        </label>
+        <div className={styles.checkbox}>
+          <input
+            id="agree"
+            type="checkbox"
+            name="allowBackspace"
+            defaultChecked={false}
+            required
+          />
+          <label htmlFor="agree">Backspace を許可する</label>
+        </div>
         <button type="submit">保存</button>
       </form>
 
