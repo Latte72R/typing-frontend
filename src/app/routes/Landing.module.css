@@ -1,0 +1,60 @@
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.primaryCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #1b8cd8, #1fd1a5);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primaryCta:hover,
+.primaryCta:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(27, 140, 216, 0.25);
+}
+
+.secondaryCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  border: 1px solid #1b8cd8;
+  color: #1b8cd8;
+  background-color: #ffffff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.featureGrid article {
+  border: 1px solid #e3e8ee;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background: #f9fbfd;
+}
+
+.featureGrid h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.featureGrid p {
+  margin-bottom: 0;
+  color: #4d5c6a;
+}

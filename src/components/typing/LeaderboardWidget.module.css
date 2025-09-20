@@ -1,0 +1,61 @@
+.leaderboard {
+  border: 1px solid #d0d7e2;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #ffffff;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.caption {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 2rem 1fr 4rem auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: #f8fafc;
+}
+
+.rank {
+  font-weight: 700;
+  text-align: center;
+}
+
+.user {
+  font-weight: 600;
+}
+
+.score {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics {
+  font-size: 0.85rem;
+  color: #64748b;
+  text-align: right;
+}
