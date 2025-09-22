@@ -12,7 +12,6 @@ export type Contest = {
   endsAt: string;
   timezone: 'Asia/Tokyo';
   timeLimitSec: number;
-  maxAttempts: number;
   allowBackspace: boolean;
   leaderboardVisibility: LeaderboardVisibility;
   language: ContestLanguage;
@@ -22,6 +21,18 @@ export type Prompt = {
   id: string;
   displayText: string;
   typingTarget: string;
+  language?: ContestLanguage;
+  tags?: string[];
+  isActive?: boolean;
+  createdAt?: string;
+};
+
+export type ContestPromptAssignment = {
+  promptId: string;
+  displayText: string;
+  typingTarget: string;
+  language: ContestLanguage;
+  orderIndex: number;
 };
 
 export type StartSessionRes = {
@@ -29,6 +40,13 @@ export type StartSessionRes = {
   contestId: string;
   prompt: Prompt;
   startedAt: string;
+  attemptsUsed: number;
+  orderIndex: number;
+};
+
+export type NextPromptRes = {
+  prompt: Prompt;
+  orderIndex: number;
 };
 
 export type KeyLogEntry = {
@@ -41,6 +59,7 @@ export type FinishSessionReq = {
   cpm: number;
   wpm: number;
   accuracy: number;
+  score: number;
   errors: number;
   keylog: KeyLogEntry[];
   clientFlags?: {
@@ -54,7 +73,6 @@ export type SessionResult = FinishSessionReq & {
   sessionId: string;
   contestId: string;
   completedAt: string;
-  score: number;
 };
 
 export type LeaderboardEntry = {
@@ -79,6 +97,7 @@ export type AuthUser = {
 
 export type AuthResponse = {
   accessToken: string;
+  refreshToken: string;
   user: AuthUser;
 };
 
@@ -104,7 +123,6 @@ export type CreateContestPayload = {
   endsAt: string;
   timezone: 'Asia/Tokyo';
   timeLimitSec: number;
-  maxAttempts: number;
   allowBackspace: boolean;
   leaderboardVisibility: LeaderboardVisibility;
   language: ContestLanguage;

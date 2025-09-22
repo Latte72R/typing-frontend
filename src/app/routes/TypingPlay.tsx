@@ -8,6 +8,7 @@ import { TypingCanvas } from '@/components/typing/TypingCanvas.tsx';
 import {
   useContestQuery,
   useFinishSessionMutation,
+  useNextPromptMutation,
   useStartSessionMutation,
 } from '@/features/contest/api/contestQueries.ts';
 import {
@@ -17,7 +18,7 @@ import {
   calculateScore,
   calculateWpm,
 } from '@/lib/keyboard/typingUtils.ts';
-import type { FinishSessionReq, KeyLogEntry, SessionResult, StartSessionRes } from '@/types/api.ts';
+import type { FinishSessionReq, KeyLogEntry, Prompt, SessionResult, StartSessionRes } from '@/types/api.ts';
 import styles from './TypingPlay.module.css';
 
 export const TypingPlay = () => {
@@ -25,29 +26,42 @@ export const TypingPlay = () => {
   const { data: contest } = useContestQuery(contestId, Boolean(contestId));
   const startSession = useStartSessionMutation();
   const finishSession = useFinishSessionMutation();
+  const nextPrompt = useNextPromptMutation();
   const navigate = useNavigate();
 
   const [session, setSession] = useState<StartSessionRes | null>(null);
+  const [currentPrompt, setCurrentPrompt] = useState<Prompt | null>(null);
+  const [currentOrder, setCurrentOrder] = useState(0);
   const [cursor, setCursor] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [errorCount, setErrorCount] = useState(0);
   const [keyLog, setKeyLog] = useState<KeyLogEntry[]>([]);
   const [keyIntervals, setKeyIntervals] = useState<number[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isAdvancingPrompt, setIsAdvancingPrompt] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [defocusCount, setDefocusCount] = useState(0);
   const [pasteBlocked] = useState(true);
   const [focusWarning, setFocusWarning] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [lastResult, setLastResult] = useState<SessionResult | null>(null);
+  const [autoNext, setAutoNext] = useState(true);
 
   const focusRef = useRef<HTMLDivElement | null>(null);
   const startTimeRef = useRef<number | null>(null);
   const lastKeyTimeRef = useRef<number | null>(null);
   const finishedRef = useRef(false);
+  const initialStartRef = useRef(false);
+  const autoNextRef = useRef(autoNext);
+  const autoStartRef = useRef(false);
 
-  const typingTarget = session?.prompt.typingTarget ?? '';
-  const displayText = session?.prompt.displayText ?? 'セッションを開始するとお題が表示されます。';
+  useEffect(() => {
+    autoNextRef.current = autoNext;
+  }, [autoNext]);
+
+  const typingTarget = currentPrompt?.typingTarget ?? '';
+  const displayText = currentPrompt?.displayText ?? 'セッションを開始するとお題が表示されます。';
 
   const accuracy = useMemo(
     () => calculateAccuracy(correctCount, correctCount + errorCount),
@@ -77,14 +91,25 @@ export const TypingPlay = () => {
     }
   }, [contest, session]);
 
+  useEffect(() => {
+    if (!contestId || initialStartRef.current || startSession.isPending) {
+      return;
+    }
+    initialStartRef.current = true;
+    void handleStartSession();
+  }, [contestId, startSession.isPending]);
+
   const resetState = (nextSession: StartSessionRes) => {
     setSession(nextSession);
+    setCurrentPrompt(nextSession.prompt);
+    setCurrentOrder(nextSession.orderIndex ?? 0);
     setCursor(0);
     setCorrectCount(0);
     setErrorCount(0);
     setKeyLog([]);
     setKeyIntervals([]);
     setIsRunning(true);
+    setIsAdvancingPrompt(false);
     setHasError(false);
     setRemainingSeconds(contest?.timeLimitSec ?? 0);
     setDefocusCount(0);
@@ -98,15 +123,20 @@ export const TypingPlay = () => {
     });
   };
 
-  const handleStartSession = () => {
+  const handleStartSession = async () => {
+    if (startSession.isPending) {
+      return;
+    }
     if (!contestId) return;
     setSubmitError(null);
-    startSession.mutate(contestId, {
-      onSuccess: resetState,
-      onError: (error) => {
-        setSubmitError(error.message ?? 'セッションを開始できませんでした。');
-      },
-    });
+    try {
+      const nextSession = await startSession.mutateAsync(contestId);
+      autoStartRef.current = true;
+      resetState(nextSession);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'セッションを開始できませんでした。');
+      autoStartRef.current = false;
+    }
   };
 
   const handleFinish = useCallback(() => {
@@ -114,6 +144,7 @@ export const TypingPlay = () => {
       return;
     }
     finishedRef.current = true;
+    setIsAdvancingPrompt(false);
     setIsRunning(false);
     const now = performance.now();
     const timeLimit = contest?.timeLimitSec ?? Number.POSITIVE_INFINITY;
@@ -132,6 +163,7 @@ export const TypingPlay = () => {
       cpm: cpmValue,
       wpm: wpmValue,
       accuracy: accuracyValue,
+      score,
       errors: errorCount,
       keylog: keyLog,
       clientFlags: {
@@ -156,7 +188,15 @@ export const TypingPlay = () => {
       {
         onSuccess: (data) => {
           const nextResult = data ?? optimisticResult;
-          navigate(`/result/${session.sessionId}`, { state: { result: nextResult, contest } });
+          setLastResult(nextResult);
+          if (autoNextRef.current) {
+            void handleStartSession();
+          } else {
+            autoStartRef.current = false;
+            setSession(null);
+            setCurrentPrompt(null);
+            setCurrentOrder(0);
+          }
         },
         onError: (error) => {
           console.error('セッション結果の送信に失敗しました', error);
@@ -178,14 +218,75 @@ export const TypingPlay = () => {
     session,
   ]);
 
-  useEffect(() => {
-    if (session && cursor >= typingTarget.length && typingTarget.length > 0) {
-      handleFinish();
+  const advancePrompt = useCallback(async () => {
+    if (!session || !currentPrompt || finishedRef.current) {
+      return;
     }
-  }, [cursor, handleFinish, session, typingTarget.length]);
+    if (isAdvancingPrompt || nextPrompt.isPending) {
+      return;
+    }
+    setIsAdvancingPrompt(true);
+    setCursor(0);
+    setHasError(false);
+    setCurrentPrompt(null);
+    lastKeyTimeRef.current = null;
+    try {
+      const result = await nextPrompt.mutateAsync(session.sessionId);
+      setCurrentPrompt(result.prompt);
+      setCurrentOrder(result.orderIndex);
+      window.requestAnimationFrame(() => {
+        focusRef.current?.focus();
+      });
+    } catch (error) {
+      console.error('次のプロンプト取得に失敗しました', error);
+      setSubmitError('次の問題を取得できませんでした。結果を保存します。');
+      handleFinish();
+    } finally {
+      setIsAdvancingPrompt(false);
+    }
+  }, [
+    currentPrompt,
+    handleFinish,
+    isAdvancingPrompt,
+    nextPrompt,
+    session,
+  ]);
+
+  useEffect(() => {
+    if (!session || !currentPrompt) {
+      return;
+    }
+    if (!isRunning || finishedRef.current) {
+      return;
+    }
+    const targetLength = currentPrompt.typingTarget.length;
+    if (targetLength === 0) {
+      return;
+    }
+    if (cursor < targetLength) {
+      return;
+    }
+    if (remainingSeconds <= 0) {
+      handleFinish();
+      return;
+    }
+    void advancePrompt();
+  }, [
+    advancePrompt,
+    currentPrompt,
+    cursor,
+    handleFinish,
+    isRunning,
+    remainingSeconds,
+    session,
+  ]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!session || !isRunning) return;
+    if (!session || !isRunning || !currentPrompt) return;
+    if (isAdvancingPrompt) {
+      event.preventDefault();
+      return;
+    }
     if (event.nativeEvent.isComposing) return;
 
     const { key, ctrlKey, metaKey, altKey } = event;
@@ -262,15 +363,21 @@ export const TypingPlay = () => {
     setFocusWarning(true);
   };
 
-  const allowInput = Boolean(session && isRunning);
+  const isActiveSession = Boolean(session && isRunning);
+  const allowInput = Boolean(isActiveSession && !isAdvancingPrompt);
 
   return (
     <PageContainer
       title="タイピングプレイ"
       description={contest ? `${contest.title} - 残り時間 ${remainingSeconds}s` : 'コンテストを選択してください'}
       actions={
-        <button type="button" className={styles.primaryButton} onClick={handleStartSession}>
-          {session ? '再挑戦' : 'セッション開始'}
+        <button
+          type="button"
+          className={styles.primaryButton}
+          onClick={handleStartSession}
+          disabled={isRunning || startSession.isPending}
+        >
+          {isRunning ? 'タイピング中…' : session ? '次の問題を始める' : 'セッション開始'}
         </button>
       }
     >
@@ -302,7 +409,7 @@ export const TypingPlay = () => {
           <div className={styles.panelRow}>
             <Timer
               duration={contest?.timeLimitSec ?? 60}
-              isRunning={allowInput}
+              isRunning={isActiveSession}
               onExpire={handleFinish}
               onTick={setRemainingSeconds}
               resetKey={session?.sessionId}
@@ -325,6 +432,36 @@ export const TypingPlay = () => {
               {submitError}
             </p>
           ) : null}
+          <section className={styles.resultPanel} aria-label="直近の結果">
+            <div className={styles.resultPanelHeader}>
+              <h2>直近の結果</h2>
+              <label className={styles.autoToggle}>
+                <input
+                  type="checkbox"
+                  checked={autoNext}
+                  onChange={(event) => setAutoNext(event.target.checked)}
+                />
+                次の問題を自動で出す
+              </label>
+            </div>
+            {lastResult ? (
+              <div className={styles.resultSummary}>
+                <p><span>スコア</span><strong>{Math.round(lastResult.score)}</strong></p>
+                <p><span>正確率</span><strong>{(lastResult.accuracy * 100).toFixed(1)}%</strong></p>
+                <p><span>ミス</span><strong>{lastResult.errors}</strong></p>
+                <div className={styles.resultActions}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/result/${lastResult.sessionId}`, { state: { result: lastResult, contest } })}
+                  >
+                    詳細を見る
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className={styles.resultPlaceholder}>まだ結果がありません。</p>
+            )}
+          </section>
         </div>
         <aside className={styles.sidebar}>
           <LeaderboardWidget contestId={contestId} />
@@ -334,6 +471,10 @@ export const TypingPlay = () => {
               <div>
                 <dt>入力可</dt>
                 <dd>{allowInput ? 'はい' : 'いいえ'}</dd>
+              </div>
+              <div>
+                <dt>出題番号</dt>
+                <dd>{session ? currentOrder + 1 : '-'}</dd>
               </div>
               <div>
                 <dt>フォーカス逸脱</dt>

@@ -1,5 +1,12 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react';
-import { useCreateContestMutation, useCreatePromptMutation } from '@/features/admin/api/adminQueries.ts';
+import {
+  useCreateContestMutation,
+  useCreatePromptMutation,
+  useDeleteContestMutation,
+  useDeletePromptMutation,
+  usePromptsQuery,
+} from '@/features/admin/api/adminQueries.ts';
+import { useContestsQuery } from '@/features/contest/api/contestQueries.ts';
 import type {
   ContestLanguage,
   ContestVisibility,
@@ -39,6 +46,14 @@ const parseDateTimeField = (value: FormDataEntryValue | null) => {
 export const AdminForms = () => {
   const createContest = useCreateContestMutation();
   const createPrompt = useCreatePromptMutation();
+  const deleteContest = useDeleteContestMutation();
+  const deletePrompt = useDeletePromptMutation();
+  const { data: contests, isLoading: isContestsLoading, error: contestsError } = useContestsQuery();
+  const {
+    data: prompts,
+    isLoading: isPromptsLoading,
+    error: promptsError,
+  } = usePromptsQuery();
   const [contestFeedback, setContestFeedback] = useState<Feedback | null>(null);
   const [promptFeedback, setPromptFeedback] = useState<Feedback | null>(null);
   const [contestVisibility, setContestVisibility] = useState<ContestVisibility>('public');
@@ -62,7 +77,6 @@ export const AdminForms = () => {
     ) as LeaderboardVisibility;
     const language = String(formData.get('language') ?? 'romaji') as ContestLanguage;
     const timeLimitSec = parseNumberField(formData.get('timeLimit'));
-    const maxAttempts = parseNumberField(formData.get('maxAttempts'));
     const allowBackspace = formData.get('allowBackspace') === 'on';
 
     setContestFeedback(null);
@@ -90,7 +104,6 @@ export const AdminForms = () => {
         endsAt,
         timezone: 'Asia/Tokyo',
         timeLimitSec,
-        maxAttempts,
         allowBackspace,
         leaderboardVisibility,
         language,
@@ -136,6 +149,42 @@ export const AdminForms = () => {
         },
       },
     );
+  };
+
+  const handleContestDelete = (contestId: string, title: string) => {
+    if (!window.confirm(`「${title}」を削除しますか？この操作は元に戻せません。`)) {
+      return;
+    }
+    setContestFeedback(null);
+    deleteContest.mutate(contestId, {
+      onSuccess: () => {
+        setContestFeedback({ type: 'success', message: 'コンテストを削除しました。' });
+      },
+      onError: (error) => {
+        setContestFeedback({
+          type: 'error',
+          message: error.message ?? 'コンテストの削除に失敗しました。',
+        });
+      },
+    });
+  };
+
+  const handlePromptDelete = (promptId: string, title: string) => {
+    if (!window.confirm(`プロンプト「${title}」を削除しますか？`)) {
+      return;
+    }
+    setPromptFeedback(null);
+    deletePrompt.mutate(promptId, {
+      onSuccess: () => {
+        setPromptFeedback({ type: 'success', message: 'プロンプトを削除しました。' });
+      },
+      onError: (error) => {
+        setPromptFeedback({
+          type: 'error',
+          message: error.message ?? 'プロンプトの削除に失敗しました。',
+        });
+      },
+    });
   };
 
   return (
@@ -197,10 +246,6 @@ export const AdminForms = () => {
           制限時間（秒）
           <input type="number" name="timeLimit" min={10} max={300} defaultValue={60} />
         </label>
-        <label>
-          最大試行回数
-          <input type="number" name="maxAttempts" min={0} max={10} defaultValue={3} />
-        </label>
         <div className={styles.checkbox}>
           <input
             id="allowBackspace"
@@ -253,6 +298,79 @@ export const AdminForms = () => {
           </p>
         ) : null}
       </form>
+
+      <section className={styles.listSection} aria-label="登録済みコンテスト">
+        <h2>登録済みコンテスト</h2>
+        {isContestsLoading ? <p>読み込み中...</p> : null}
+        {contestsError ? (
+          <p className={styles.listError} role="alert">
+            コンテスト一覧を取得できませんでした。
+          </p>
+        ) : null}
+        {!isContestsLoading && !contestsError ? (
+          <ul className={styles.itemList}>
+            {(contests ?? []).length === 0 ? (
+              <li className={styles.emptyMessage}>まだコンテストが登録されていません。</li>
+            ) : null}
+            {(contests ?? []).map((contest) => (
+              <li key={contest.id} className={styles.item}>
+                <div>
+                  <p className={styles.itemTitle}>{contest.title}</p>
+                  <p className={styles.itemMeta}>
+                    {new Date(contest.startsAt).toLocaleString()} 〜 {new Date(contest.endsAt).toLocaleString()} /
+                    制限時間: ${contest.timeLimitSec} 秒
+                  </p>
+                </div>
+                <div className={styles.itemActions}>
+                  <button
+                    type="button"
+                    className={styles.dangerButton}
+                    onClick={() => handleContestDelete(contest.id, contest.title)}
+                    disabled={deleteContest.isPending}
+                  >
+                    削除
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+
+      <section className={styles.listSection} aria-label="登録済みプロンプト">
+        <h2>登録済みプロンプト</h2>
+        {isPromptsLoading ? <p>読み込み中...</p> : null}
+        {promptsError ? (
+          <p className={styles.listError} role="alert">
+            プロンプト一覧を取得できませんでした。
+          </p>
+        ) : null}
+        {!isPromptsLoading && !promptsError ? (
+          <ul className={styles.itemList}>
+            {(prompts ?? []).length === 0 ? (
+              <li className={styles.emptyMessage}>まだプロンプトが登録されていません。</li>
+            ) : null}
+            {(prompts ?? []).map((prompt) => (
+              <li key={prompt.id} className={styles.item}>
+                <div>
+                  <p className={styles.itemTitle}>{prompt.displayText}</p>
+                  <p className={styles.itemMeta}>言語: {prompt.language ?? '不明'} / キー列: {prompt.typingTarget}</p>
+                </div>
+                <div className={styles.itemActions}>
+                  <button
+                    type="button"
+                    className={styles.dangerButton}
+                    onClick={() => handlePromptDelete(prompt.id, prompt.displayText)}
+                    disabled={deletePrompt.isPending}
+                  >
+                    削除
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
     </section>
   );
 };

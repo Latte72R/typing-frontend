@@ -28,6 +28,15 @@ export const Result = () => {
     );
   }
 
+
+  const safeCpm = Number.isFinite(result.cpm) ? Math.round(result.cpm) : 0;
+  const safeWpm = Number.isFinite(result.wpm) ? Math.round(result.wpm) : 0;
+  const safeAccuracy = Number.isFinite(result.accuracy) ? result.accuracy : 0;
+  const safeErrors = typeof result.errors === 'number' ? result.errors : 0;
+  const safeScore = typeof result.score === 'number' ? result.score : 0;
+  const keylogCount = Array.isArray(result.keylog) ? result.keylog.length : 0;
+  const anomalyScore = result.clientFlags?.anomalyScore ?? 0;
+
   return (
     <PageContainer
       title="リザルト"
@@ -40,10 +49,10 @@ export const Result = () => {
     >
       <div className={styles.grid}>
         <KeyStats
-          cpm={Math.round(result.cpm)}
-          wpm={Math.round(result.wpm)}
-          accuracy={result.accuracy}
-          errors={result.errors}
+          cpm={safeCpm}
+          wpm={safeWpm}
+          accuracy={safeAccuracy}
+          errors={safeErrors}
           remainingSeconds={0}
         />
         <section className={styles.summary}>
@@ -51,23 +60,23 @@ export const Result = () => {
           <dl>
             <div>
               <dt>スコア</dt>
-              <dd>{result.score}</dd>
+              <dd>{safeScore}</dd>
             </div>
             <div>
               <dt>正確率</dt>
-              <dd>{formatAccuracy(result.accuracy)}</dd>
+              <dd>{formatAccuracy(safeAccuracy)}</dd>
             </div>
             <div>
               <dt>ミス</dt>
-              <dd>{result.errors}</dd>
+              <dd>{safeErrors}</dd>
             </div>
             <div>
               <dt>ログ総数</dt>
-              <dd>{result.keylog.length}</dd>
+              <dd>{keylogCount}</dd>
             </div>
             <div>
               <dt>異常スコア</dt>
-              <dd>{result.clientFlags?.anomalyScore ?? 0}</dd>
+              <dd>{anomalyScore}</dd>
             </div>
           </dl>
         </section>

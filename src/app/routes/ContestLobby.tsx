@@ -1,15 +1,35 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
-import { useContestQuery, useJoinContestMutation } from '@/features/contest/api/contestQueries.ts';
+import { useAuth } from '@/features/auth/contexts/AuthContext.tsx';
+import {
+  useContestQuery,
+  useJoinContestMutation,
+} from '@/features/contest/api/contestQueries.ts';
+import { ContestPromptManager } from '@/features/contest/components/ContestPromptManager.tsx';
 import styles from './ContestLobby.module.css';
+
+const leaderboardVisibilityLabels: Record<string, string> = {
+  during: '期間中公開',
+  after: '終了後公開',
+  hidden: '非公開',
+};
 
 export const ContestLobby = () => {
   const { contestId = '' } = useParams();
+  const { user } = useAuth();
   const { data: contest, isLoading, error } = useContestQuery(contestId, Boolean(contestId));
   const joinContest = useJoinContestMutation();
   const [code, setCode] = useState('');
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const requiresJoinCode = contest?.visibility === 'private';
+  const canManagePrompts = Boolean(user && user.role === 'admin' && contestId);
+
+  const leaderboardVisibilityLabel = useMemo(() => {
+    if (!contest) return '';
+    return leaderboardVisibilityLabels[contest.leaderboardVisibility] ?? contest.leaderboardVisibility;
+  }, [contest]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -17,7 +37,7 @@ export const ContestLobby = () => {
       setFeedback({ type: 'error', message: 'コンテストIDが無効です。' });
       return;
     }
-    if (contest?.visibility === 'private' && code.trim() === '') {
+    if (requiresJoinCode && code.trim() === '') {
       setFeedback({ type: 'error', message: '参加コードを入力してください。' });
       return;
     }
@@ -26,10 +46,11 @@ export const ContestLobby = () => {
       { contestId, joinCode: code.trim() || undefined },
       {
         onSuccess: () => {
+          setCode('');
           setFeedback({ type: 'success', message: '参加登録が完了しました。' });
         },
-        onError: (error) => {
-          setFeedback({ type: 'error', message: error.message ?? '参加登録に失敗しました。' });
+        onError: (joinError) => {
+          setFeedback({ type: 'error', message: joinError.message ?? '参加登録に失敗しました。' });
         },
       },
     );
@@ -57,33 +78,35 @@ export const ContestLobby = () => {
             <dl className={styles.detailList}>
               <div>
                 <dt>制限時間</dt>
-                <dd>{contest.timeLimitSec} 秒</dd>
-              </div>
-              <div>
-                <dt>最大試行回数</dt>
-                <dd>{contest.maxAttempts === 0 ? '無制限' : `${contest.maxAttempts} 回`}</dd>
+                <dd>{contest.timeLimitSec != null ? `${contest.timeLimitSec} 秒` : '未設定'}</dd>
               </div>
               <div>
                 <dt>Backspace</dt>
                 <dd>{contest.allowBackspace ? '使用可' : '使用不可'}</dd>
               </div>
               <div>
-                <dt>公開設定</dt>
-                <dd>{contest.leaderboardVisibility}</dd>
+                <dt>ランキング公開</dt>
+                <dd>{leaderboardVisibilityLabel}</dd>
               </div>
             </dl>
           </section>
           <section>
-            <h2>参加コード</h2>
+            <h2>参加登録</h2>
             <form className={styles.joinForm} onSubmit={handleSubmit}>
-              <label htmlFor="join-code">参加コードを入力</label>
-              <input
-                id="join-code"
-                value={code}
-                onChange={(event) => setCode(event.target.value)}
-                placeholder={contest.visibility === 'private' ? 'コード必須' : '公開コンテスト'}
-                aria-required={contest.visibility === 'private'}
-              />
+              {requiresJoinCode ? (
+                <>
+                  <label htmlFor="join-code">参加コードを入力</label>
+                  <input
+                    id="join-code"
+                    value={code}
+                    onChange={(event) => setCode(event.target.value)}
+                    placeholder="コード必須"
+                    aria-required={true}
+                  />
+                </>
+              ) : (
+                <p className={styles.joinNotice}>このコンテストは公開されています。参加コードは不要です。</p>
+              )}
               <button type="submit" disabled={joinContest.isPending}>
                 {joinContest.isPending ? '送信中...' : '参加登録'}
               </button>
@@ -99,6 +122,8 @@ export const ContestLobby = () => {
           </section>
         </div>
       ) : null}
+
+      {contest && canManagePrompts ? <ContestPromptManager contestId={contest.id} /> : null}
     </PageContainer>
   );
 };

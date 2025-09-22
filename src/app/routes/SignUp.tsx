@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { PageContainer } from '@/components/layout/PageContainer.tsx';
 import { useSignUpMutation } from '@/features/auth/api/authQueries.ts';
 import { useAuth } from '@/features/auth/contexts/AuthContext.tsx';
-import { setAccessToken } from '@/lib/apiClient.ts';
+import { setAccessToken, setRefreshToken } from '@/lib/apiClient.ts';
 import styles from './Auth.module.css';
 
 export const SignUp = () => {
@@ -28,6 +28,7 @@ export const SignUp = () => {
       {
         onSuccess: (data) => {
           setAccessToken(data.accessToken);
+          setRefreshToken(data.refreshToken);
           setUser(data.user);
           setFeedback({ type: 'success', message: 'アカウント登録が完了しました。ダッシュボードへ移動します。' });
           navigate('/dashboard');

@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react';
 import { useSignOutMutation } from '@/features/auth/api/authQueries.ts';
 import { useAuth } from '@/features/auth/contexts/AuthContext.tsx';
-import { clearAccessToken } from '@/lib/apiClient.ts';
+import { clearAccessToken, clearRefreshToken } from '@/lib/apiClient.ts';
 
 type LogoutButtonProps = {
   label?: string;
@@ -25,6 +25,7 @@ export const LogoutButton = ({
       },
       onSettled: () => {
         clearAccessToken();
+        clearRefreshToken();
         clearUser();
       },
     });

@@ -73,3 +73,158 @@
 .feedbackError {
   color: #b91c1c;
 }
+
+.joinNotice {
+  margin: 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.promptManager {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1.25rem;
+  border: 1px solid #d0d7e2;
+  border-radius: 0.75rem;
+  background-color: #f8fafc;
+}
+
+.promptManagerHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.promptManagerHeader h2 {
+  margin: 0;
+}
+
+.promptManagerHeader p {
+  margin: 0.25rem 0 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.promptManagerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.promptManagerActions select,
+.promptManagerActions button {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.6rem;
+  border: 1px solid #cbd5e1;
+}
+
+.promptManagerActions button {
+  border: none;
+  background-color: #1b8cd8;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.promptManagerError {
+  margin: 0;
+  color: #b91c1c;
+}
+
+.promptManagerLoading {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.promptList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.promptListItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background-color: #fff;
+}
+
+.promptListEmpty {
+  padding: 0.5rem;
+  color: #b2b9c2;
+  font-size: 0.9rem;
+}
+
+.promptListContent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.promptOrder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background-color: #e2e8f0;
+  font-weight: 600;
+}
+
+.promptTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.promptMeta {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.promptListControls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.promptListControls button {
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #00132b;
+  background-color: #1b8cd8;
+  cursor: pointer;
+}
+
+.promptManagerFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.promptManagerFooter button {
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.6rem;
+  border: none;
+  background: linear-gradient(120deg, #1b8cd8, #1fd1a5);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.promptManagerFeedback {
+  margin: 0;
+  color: #166534;
+  font-size: 0.9rem;
+}

@@ -21,6 +21,7 @@ export const AppRoutes = () => {
     { path: '/contests/:contestId', element: <ContestLobby /> },
     { path: '/typing/:contestId', element: <TypingPlay /> },
     { path: '/result/:sessionId', element: <Result /> },
+    { path: '/leaderboard', element: <Leaderboard /> },
     { path: '/leaderboard/:contestId', element: <Leaderboard /> },
     { path: '/admin', element: <AdminConsole /> },
     { path: '*', element: <NotFound /> },

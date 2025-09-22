@@ -63,3 +63,68 @@
 .feedbackError {
   color: #dc2626;
 }
+
+.listSection {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #d0d7e2;
+  background-color: #f9fbfd;
+}
+
+.itemList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background-color: #fff;
+}
+
+.itemTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.itemMeta {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.itemActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.itemActions button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  border: none;
+  cursor: pointer;
+}
+
+.dangerButton {
+  background-color: #dc2626;
+  color: #fff;
+  font-weight: 600;
+}
+
+.emptyMessage {
+  color: #64748b;
+}
+
+.listError {
+  color: #dc2626;
+}

@@ -30,10 +30,6 @@ export const Dashboard = () => {
                 <dd>{contest.timeLimitSec} 秒</dd>
               </div>
               <div>
-                <dt>最大試行</dt>
-                <dd>{contest.maxAttempts === 0 ? '無制限' : `${contest.maxAttempts} 回`}</dd>
-              </div>
-              <div>
                 <dt>公開範囲</dt>
                 <dd>{contest.visibility === 'public' ? '公開' : '非公開'}</dd>
               </div>

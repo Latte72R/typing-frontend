@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/apiClient.ts';
+import { apiClient, getRefreshToken } from '@/lib/apiClient.ts';
 import type {
   AuthResponse,
   PasswordResetPayload,
@@ -15,7 +15,9 @@ export const signUp = async (payload: SignUpPayload): Promise<AuthResponse> => {
 };
 
 export const signOut = async (): Promise<void> => {
-  return apiClient.post<void>('/auth/signout');
+  const refreshToken = getRefreshToken();
+  const body = refreshToken ? { refreshToken } : {};
+  return apiClient.post<void>('/auth/signout', body);
 };
 
 export const requestPasswordReset = async (payload: PasswordResetPayload): Promise<void> => {
