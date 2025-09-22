@@ -91,15 +91,7 @@ export const TypingPlay = () => {
     }
   }, [contest, session]);
 
-  useEffect(() => {
-    if (!contestId || initialStartRef.current || startSession.isPending) {
-      return;
-    }
-    initialStartRef.current = true;
-    void handleStartSession();
-  }, [contestId, startSession.isPending]);
-
-  const resetState = (nextSession: StartSessionRes) => {
+  const resetState = useCallback((nextSession: StartSessionRes) => {
     setSession(nextSession);
     setCurrentPrompt(nextSession.prompt);
     setCurrentOrder(nextSession.orderIndex ?? 0);
@@ -121,9 +113,9 @@ export const TypingPlay = () => {
     window.requestAnimationFrame(() => {
       focusRef.current?.focus();
     });
-  };
+  }, [contest?.timeLimitSec]);
 
-  const handleStartSession = async () => {
+  const handleStartSession = useCallback(async () => {
     if (startSession.isPending) {
       return;
     }
@@ -137,7 +129,15 @@ export const TypingPlay = () => {
       setSubmitError(error instanceof Error ? error.message : 'セッションを開始できませんでした。');
       autoStartRef.current = false;
     }
-  };
+  }, [contestId, resetState, startSession]);
+
+  useEffect(() => {
+    if (!contestId || initialStartRef.current) {
+      return;
+    }
+    initialStartRef.current = true;
+    void handleStartSession();
+  }, [contestId, handleStartSession]);
 
   const handleFinish = useCallback(() => {
     if (!session || finishedRef.current) {
@@ -211,9 +211,9 @@ export const TypingPlay = () => {
     defocusCount,
     errorCount,
     finishSession,
+    handleStartSession,
     keyIntervals,
     keyLog,
-    navigate,
     pasteBlocked,
     session,
   ]);

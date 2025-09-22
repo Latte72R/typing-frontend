@@ -183,9 +183,9 @@ export const ContestPromptManager = ({ contestId }: ContestPromptManagerProps) =
           {updatePrompts.isPending ? '保存中...' : 'この構成で保存'}
         </button>
         {feedback ? (
-          <p className={styles.promptManagerFeedback} role="status">
+          <output className={styles.promptManagerFeedback} aria-live="polite" aria-atomic="true">
             {feedback}
-          </p>
+          </output>
         ) : null}
       </div>
     </section>
