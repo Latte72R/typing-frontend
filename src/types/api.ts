@@ -76,15 +76,19 @@ export type SessionResult = FinishSessionReq & {
 };
 
 export type LeaderboardEntry = {
+  sessionId: string;
+  userId: string;
+  username?: string;
   rank: number;
-  user: string;
   score: number;
   cpm: number;
   accuracy: number;
+  endedAt: string;
 };
 
 export type LeaderboardPayload = {
   top: LeaderboardEntry[];
+  total: number;
   me?: LeaderboardEntry | null;
 };
 

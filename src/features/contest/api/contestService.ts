@@ -15,7 +15,35 @@ type JoinContestPayload = {
 
 type FinishSessionPayload = {
   sessionId: string;
+  contestId: string;
   request: FinishSessionReq;
+};
+
+type FinishSessionResponse = {
+  status: 'finished' | 'expired' | 'dq';
+  stats: {
+    cpm: number;
+    wpm: number;
+    accuracy: number;
+    score: number;
+    correct: number;
+    mistakes: number;
+    elapsedMs: number;
+  };
+  issues: string[];
+  anomaly: {
+    mean: number;
+    stdev: number;
+    cv: number;
+    count: number;
+  };
+  flags: {
+    pasteBlocked: boolean;
+    defocus: number;
+    anomalyScore?: number;
+  };
+  bestUpdated: boolean;
+  attemptsUsed: number;
 };
 
 type ContestListResponse = { contests: Contest[] };
@@ -89,9 +117,36 @@ export const startContestSession = async (contestId: string): Promise<StartSessi
 
 export const finishContestSession = async ({
   sessionId,
+  contestId,
   request,
 }: FinishSessionPayload): Promise<SessionResult> => {
-  return apiClient.post<SessionResult>(`/sessions/${sessionId}/finish`, request);
+  const response = await apiClient.post<FinishSessionResponse>(`/sessions/${sessionId}/finish`, request);
+  if (!response || typeof response !== 'object' || !response.stats) {
+    return {
+      sessionId,
+      contestId,
+      ...request,
+      completedAt: new Date().toISOString(),
+    } satisfies SessionResult;
+  }
+  const stats = response.stats;
+  const flags = response.flags ?? {};
+  return {
+    sessionId,
+    contestId,
+    cpm: stats.cpm,
+    wpm: stats.wpm,
+    accuracy: stats.accuracy,
+    score: stats.score,
+    errors: typeof stats.mistakes === 'number' ? stats.mistakes : request.errors,
+    keylog: request.keylog,
+    clientFlags: {
+      defocus: flags.defocus ?? request.clientFlags?.defocus ?? 0,
+      pasteBlocked: flags.pasteBlocked ?? request.clientFlags?.pasteBlocked ?? false,
+      anomalyScore: flags.anomalyScore ?? request.clientFlags?.anomalyScore,
+    },
+    completedAt: new Date().toISOString(),
+  } satisfies SessionResult;
 };
 
 export const requestNextPrompt = async (sessionId: string): Promise<NextPromptRes> => {

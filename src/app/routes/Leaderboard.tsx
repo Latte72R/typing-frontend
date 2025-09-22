@@ -26,6 +26,12 @@ export const Leaderboard = () => {
 
   const { data, isLoading, error } = useLeaderboardQuery(contestId, Boolean(contestId));
   const showTable = Boolean(data && data.top.length > 0);
+  const me = data?.me ?? null;
+  const personalEntry = me && data
+    ? (data.top.some((entry) => entry.sessionId === me.sessionId) ? null : me)
+    : null;
+
+  const renderUserName = (username?: string) => username ?? '匿名ユーザー';
   const showUnknownOption = Boolean(contestId && !activeContest);
 
   const handleContestChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -79,7 +85,7 @@ export const Leaderboard = () => {
           ) : null}
           {showTable ? (
             <table className={styles.table}>
-              <caption>上位10名のスコア</caption>
+              <caption>上位10名のスコア（記録総数: {data?.total ?? 0}）</caption>
               <thead>
                 <tr>
                   <th scope="col">順位</th>
@@ -91,14 +97,23 @@ export const Leaderboard = () => {
               </thead>
               <tbody>
                 {data?.top.map((entry) => (
-                  <tr key={entry.rank}>
+                  <tr key={entry.sessionId}>
                     <td>{entry.rank}</td>
-                    <td>{entry.user}</td>
+                    <td>{renderUserName(entry.username)}</td>
                     <td>{entry.score}</td>
                     <td>{entry.cpm}</td>
                     <td>{(entry.accuracy * 100).toFixed(1)}%</td>
                   </tr>
                 ))}
+                {personalEntry ? (
+                  <tr key={personalEntry.sessionId} className={styles.personalRow}>
+                    <td>{personalEntry.rank}</td>
+                    <td>{renderUserName(personalEntry.username)}（あなた）</td>
+                    <td>{personalEntry.score}</td>
+                    <td>{personalEntry.cpm}</td>
+                    <td>{(personalEntry.accuracy * 100).toFixed(1)}%</td>
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           ) : null}

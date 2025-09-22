@@ -55,3 +55,8 @@ tbody tr:nth-of-type(even) {
 tbody tr:hover {
   background-color: #e0f2fe;
 }
+
+.personalRow {
+  background-color: #eef2ff;
+  font-weight: 600;
+}

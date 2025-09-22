@@ -20,6 +20,11 @@ export const LeaderboardWidget = ({ contestId }: LeaderboardWidgetProps) => {
     return <p>ランキング情報がありません。</p>;
   }
 
+  const me = data.me ?? null;
+  const personalEntry = me && !data.top.some((entry) => entry.sessionId === me.sessionId) ? me : null;
+
+  const renderUserName = (username?: string) => username ?? '匿名ユーザー';
+
   return (
     <section className={styles.leaderboard} aria-label="暫定ランキング">
       <header className={styles.header}>
@@ -28,14 +33,25 @@ export const LeaderboardWidget = ({ contestId }: LeaderboardWidgetProps) => {
       </header>
       <ol className={styles.list}>
         {data.top.map((entry) => (
-          <li key={entry.rank} className={styles.item}>
+          <li key={entry.sessionId} className={styles.item}>
             <span className={styles.rank}>{entry.rank}</span>
-            <span className={styles.user}>{entry.user}</span>
+            <span className={styles.user}>{renderUserName(entry.username)}</span>
             <span className={styles.score}>{entry.score}</span>
             <span className={styles.metrics}>{entry.cpm}cpm / {(entry.accuracy * 100).toFixed(1)}%</span>
           </li>
         ))}
+        {personalEntry ? (
+          <li key={personalEntry.sessionId} className={`${styles.item} ${styles.personal}`}>
+            <span className={styles.rank}>{personalEntry.rank}</span>
+            <span className={styles.user}>{renderUserName(personalEntry.username)}（あなた）</span>
+            <span className={styles.score}>{personalEntry.score}</span>
+            <span className={styles.metrics}>{personalEntry.cpm}cpm / {(personalEntry.accuracy * 100).toFixed(1)}%</span>
+          </li>
+        ) : null}
       </ol>
+      <footer className={styles.footer}>
+        <span>記録総数: {data.total}</span>
+      </footer>
     </section>
   );
 };

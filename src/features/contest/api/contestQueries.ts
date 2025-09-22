@@ -81,7 +81,7 @@ export const useNextPromptMutation = () =>
 export const useFinishSessionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation<SessionResult, Error, FinishSessionVariables>({
-    mutationFn: ({ sessionId, request }) => finishContestSession({ sessionId, request }),
+    mutationFn: ({ sessionId, contestId, request }) => finishContestSession({ sessionId, contestId, request }),
     onSuccess: (data, variables) => {
       const targetContestId = data?.contestId ?? variables.contestId;
       queryClient.invalidateQueries({ queryKey: contestKeys.leaderboard(targetContestId) });

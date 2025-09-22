@@ -10,44 +10,47 @@ type TimerProps = {
 };
 
 export const Timer = ({ duration, isRunning, onExpire, onTick, resetKey }: TimerProps) => {
-  const [remaining, setRemaining] = useState(duration);
+  const [remaining, setRemaining] = useState(() => Math.max(0, Math.floor(duration)));
   const hasExpiredRef = useRef(false);
 
   useEffect(() => {
-    setRemaining(duration);
+    setRemaining(Math.max(0, Math.floor(duration)));
     hasExpiredRef.current = false;
-    onTick?.(duration);
-  }, [duration, onTick]);
+  }, [duration]);
 
   useEffect(() => {
     if (resetKey == null) {
       return;
     }
-    setRemaining(duration);
+    setRemaining(Math.max(0, Math.floor(duration)));
     hasExpiredRef.current = false;
-    onTick?.(duration);
-  }, [resetKey, duration, onTick]);
+  }, [resetKey, duration]);
 
   useEffect(() => {
-    if (!isRunning || remaining <= 0 || hasExpiredRef.current) {
+    if (!isRunning || hasExpiredRef.current) {
+      return;
+    }
+    if (remaining <= 0) {
       return;
     }
 
     const intervalId = window.setInterval(() => {
-      setRemaining((prev) => {
-        const next = prev - 1;
-        onTick?.(Math.max(next, 0));
-        if (next <= 0 && !hasExpiredRef.current) {
-          hasExpiredRef.current = true;
-          onExpire();
-          return 0;
-        }
-        return next;
-      });
+      setRemaining((prev) => Math.max(prev - 1, 0));
     }, 1000);
 
     return () => window.clearInterval(intervalId);
-  }, [isRunning, remaining, onExpire, onTick]);
+  }, [isRunning, remaining]);
+
+  useEffect(() => {
+    if (!Number.isFinite(remaining)) {
+      return;
+    }
+    onTick?.(remaining);
+    if (remaining <= 0 && isRunning && !hasExpiredRef.current) {
+      hasExpiredRef.current = true;
+      onExpire();
+    }
+  }, [remaining, isRunning, onExpire, onTick]);
 
   return (
     <div className={styles.timer} role="timer" aria-live="polite">

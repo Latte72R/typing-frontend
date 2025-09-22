@@ -40,6 +40,11 @@
   background-color: #f8fafc;
 }
 
+.personal {
+  background-color: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+
 .rank {
   font-weight: 700;
   text-align: center;
@@ -57,5 +62,12 @@
 .metrics {
   font-size: 0.85rem;
   color: #64748b;
+  text-align: right;
+}
+
+.footer {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: #475569;
   text-align: right;
 }
